@@ -123,6 +123,10 @@ func main() {
 			debug = true
 		}
 
+		if (arg == "-ps" || arg == "--poolstart") && i+1 < len(args) {
+			data.poolstart = args[i+1] // validate ip
+		}
+
 		utils.Debug(arg, debug)
 	}
 }
