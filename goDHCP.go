@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	utils "github.com/jgib/utils"
 )
@@ -124,9 +125,71 @@ func main() {
 		}
 
 		if (arg == "-ps" || arg == "--poolstart") && i+1 < len(args) {
-			data.poolstart = args[i+1] // validate ip
+			_, err := utils.Ip2Uint32(args[i+1])
+			utils.Er(err)
+			data.poolStart = args[i+1]
+		}
+
+		if (arg == "-pe" || arg == "--poolend") && i+1 < len(args) {
+			_, err := utils.Ip2Uint32(args[i+1])
+			utils.Er(err)
+			data.poolEnd = args[i+1]
+		}
+
+		if (arg == "-sp" || arg == "--serverport") && i+1 < len(args) {
+			tmp, err := utils.Port2Uint16(args[i+1])
+			utils.Er(err)
+			data.serverPort = tmp
+		}
+
+		if (arg == "-cp" || arg == "--clientport") && i+1 < len(args) {
+			tmp, err := utils.Port2Uint16(args[i+1])
+			utils.Er(err)
+			data.clientPort = tmp
+		}
+
+		if arg == "--op" && i+1 < len(args) {
+			tmp, err := strconv.ParseUint(args[i+1], 10, 8)
+			utils.Er(err)
+			data.op = byte(tmp)
+		}
+
+		if arg == "--htype" && i+1 < len(args) {
+			tmp, err := strconv.ParseUint(args[i+1], 10, 8)
+			utils.Er(err)
+			data.htype = byte(tmp)
+		}
+
+		if arg == "--hlen" && i+1 < len(args) {
+			tmp, err := strconv.ParseUint(args[i+1], 10, 8)
+			utils.Er(err)
+			data.hlen = byte(tmp)
+		}
+
+		if arg == "--hops" && i+1 < len(args) {
+			tmp, err := strconv.ParseUint(args[i+1], 10, 8)
+			utils.Er(err)
+			data.hops = byte(tmp)
+		}
+
+		if arg == "--xid" && i+1 < len(args) {
+			tmp, err := strconv.ParseUint(args[i+1], 10, 32)
+			utils.Er(err)
+			data.xid = uint32(tmp)
+		}
+
+		if arg == "--flags" {
+			data.flags = 0b1000000000000000
 		}
 
 		utils.Debug(arg, debug)
+	}
+
+	startIp, err := utils.Ip2Uint32(data.poolStart)
+	utils.Er(err)
+	stopIp, err := utils.Ip2Uint32(data.poolEnd)
+	utils.Er(err)
+	if startIp > stopIp {
+		utils.Er(fmt.Errorf("pool end IP [%s] cannot be larger than pool start IP [%s]", data.poolEnd, data.poolStart))
 	}
 }
