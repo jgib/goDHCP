@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	utils "github.com/jgib/utils"
@@ -34,6 +35,28 @@ type dhcpData struct {
 }
 
 var data dhcpData
+
+func PrintData() {
+	utils.Debug(fmt.Sprintf("POOL START: %s", data.poolStart), debug)
+	utils.Debug(fmt.Sprintf("POOL STOP:  %s", data.poolEnd), debug)
+	utils.Debug(fmt.Sprintf("SERVER PORT:%d", data.serverPort), debug)
+	utils.Debug(fmt.Sprintf("CLIENT PORT:%d", data.clientPort), debug)
+	utils.Debug(fmt.Sprintf("OP:         %d", data.op), debug)
+	utils.Debug(fmt.Sprintf("HTYPE:      %d", data.htype), debug)
+	utils.Debug(fmt.Sprintf("HLEN:       %d", data.hlen), debug)
+	utils.Debug(fmt.Sprintf("HOPS:       %d", data.hops), debug)
+	utils.Debug(fmt.Sprintf("XID:        %d", data.xid), debug)
+	utils.Debug(fmt.Sprintf("SECS:       %d", data.secs), debug)
+	utils.Debug(fmt.Sprintf("FLAGS:      %d", data.flags), debug)
+	utils.Debug(fmt.Sprintf("CIADDR:     %d", data.ciaddr), debug)
+	utils.Debug(fmt.Sprintf("YIADDR:     %d", data.yiaddr), debug)
+	utils.Debug(fmt.Sprintf("SIADDR:     %d", data.siaddr), debug)
+	utils.Debug(fmt.Sprintf("GIADDR:     %d", data.giaddr), debug)
+	utils.Debug(fmt.Sprintf("CHADDR:\n%s", utils.WalkByteSlice(data.chaddr)), debug)
+	utils.Debug(fmt.Sprintf("SNAME:      %s", data.sname), debug)
+	utils.Debug(fmt.Sprintf("FILE:       %s", data.file), debug)
+	utils.Debug(fmt.Sprintf("OPTIONS:\n%s", utils.WalkByteSlice(data.options)), debug)
+}
 
 func main() {
 	data.serverPort = 67
@@ -78,8 +101,8 @@ func main() {
 			fmt.Printf(" [--sname STRING]   Optional server host name, null terminated string, Max of 64 bytes.\n")
 			fmt.Printf(" [--file STRING]    Boot file name, null terminated string, Max of 128 bytes.\n")
 
-			fmt.Printf("\nDHCP Options:\n")
-			fmt.Printf(" RFC 1497 Vendor Extensions:\n")
+			fmt.Printf("\nDHCP Options:")
+			fmt.Printf("\n RFC 1497 Vendor Extensions:\n")
 			fmt.Printf("  [-0]          Pad.\n")
 			fmt.Printf("  [-255]        End.\n")
 			fmt.Printf("  [-1 A.B.C.D]  Subnet Mask: Specifies the client's subnet mask as per RFC 950.\n")
@@ -111,13 +134,20 @@ func main() {
 			fmt.Printf("  [-17 STRING]  Root Path: Specifies the path-name that contains the client's root disk.\n")
 			fmt.Printf("  [-18 STRING]  Extensions Path: Specifies a file, retrievable via TFTP.\n")
 
-			fmt.Printf(" IP Layer Parameters per Host:\n")
+			fmt.Printf("\n IP Layer Parameters per Host:\n")
+			fmt.Printf("  [-19]                 IP Forwarding: Specifies whether the client should configure its IP layer for packet forwarding.\n")
+			fmt.Printf("  [-20]                 Non-Local Source Routing: Specifies whether the client should configure its IP layer to allow forwarding of\n")
+			fmt.Printf("                        datagrams with non-local source routes.\n")
+			fmt.Printf("  [-21 A.B.C.D M.M.M.M] Policy Filter: Specifies policy filters  for non-local source routing. The filters consist of a list of IP\n")
+			fmt.Printf("                        addresses and masks which specify destination/mask pairs with which to filter incoming source routes.")
 			fmt.Printf("  ...\n")
-			fmt.Printf(" IP Layer Parameters per Interface:\n")
-			fmt.Printf(" Link Layer Parameters per Interface:\n")
-			fmt.Printf(" TCP Parameters:\n")
-			fmt.Printf(" Application and Service Parameters:\n")
-			fmt.Printf(" DHCP Extensions:\n")
+			fmt.Printf("\n IP Layer Parameters per Interface:\n")
+			fmt.Printf("\n Link Layer Parameters per Interface:\n")
+			fmt.Printf("\n TCP Parameters:\n")
+			fmt.Printf("\n Application and Service Parameters:\n")
+			fmt.Printf("\n DHCP Extensions:\n")
+
+			os.Exit(0)
 		}
 
 		if arg == "-v" || arg == "--verbose" {
@@ -182,8 +212,77 @@ func main() {
 			data.flags = 0b1000000000000000
 		}
 
+		if arg == "--yiaddr" && i+1 < len(args) {
+			tmp, err := utils.Ip2Uint32(args[i+1])
+			utils.Er(err)
+			data.yiaddr = tmp
+		}
+
+		if arg == "--siaddr" && i+1 < len(args) {
+			tmp, err := utils.Ip2Uint32(args[i+1])
+			utils.Er(err)
+			data.siaddr = tmp
+		}
+
+		if arg == "--giaddr" && i+1 < len(args) {
+			tmp, err := utils.Ip2Uint32(args[i+1])
+			utils.Er(err)
+			data.giaddr = tmp
+		}
+
+		if arg == "--chaddr" && i+1 < len(args) {
+			for j, k := 0, 0; j < len(args[i+1]); j, k = j+2, k+1 {
+				if j+1 < len(args[i+1]) {
+					tmp, err := strconv.ParseUint(args[i+1][j:j+2], 16, 8)
+					utils.Er(err)
+					data.chaddr[k] = byte(tmp)
+				}
+			}
+		}
+
+		if arg == "--sname" && i+1 < len(args) {
+			for j := 0; j < len(args[i+1]); j++ {
+				if j >= len(data.sname) {
+					break
+				}
+
+				data.sname[j] = args[i+1][j]
+			}
+			data.sname[len(data.sname)-1] = 0
+		}
+
+		if arg == "--file" && i+1 < len(args) {
+			for j := 0; j < len(args[i+1]); j++ {
+				if j >= len(data.file) {
+					break
+				}
+
+				data.file[j] = args[i+1][j]
+			}
+			data.file[len(data.file)-1] = 0
+		}
+
+		if arg == "-0" {
+			data.options = append(data.options, 0)
+		}
+
+		if arg == "-255" {
+			data.options = append(data.options, 255)
+		}
+
+		if arg == "-1" && i+1 < len(args) {
+			ip, err := utils.Ip2Uint32(args[i+1])
+			utils.Er(err)
+			data.options = append(data.options, byte(ip>>24))
+			data.options = append(data.options, byte(ip>>16))
+			data.options = append(data.options, byte(ip>>8))
+			data.options = append(data.options, byte(ip))
+		}
+
 		utils.Debug(arg, debug)
 	}
+
+	PrintData()
 
 	startIp, err := utils.Ip2Uint32(data.poolStart)
 	utils.Er(err)
