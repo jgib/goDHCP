@@ -270,13 +270,14 @@ func main() {
 			data.options = append(data.options, 255)
 		}
 
-		if arg == "-1" && i+1 < len(args) {
-			ip, err := utils.Ip2Uint32(args[i+1])
+		if (arg == "-1" || arg == "-2" || arg == "-3" || arg == "-4" || arg == "-5" || arg == "-6" || arg == "-7" || arg == "-8" || arg == "-9" || arg == "-10" ||
+			arg == "-11") && i+1 < len(args) {
+			tmp, err := strconv.ParseUint(args[i+1], 10, 32)
 			utils.Er(err)
-			data.options = append(data.options, byte(ip>>24))
-			data.options = append(data.options, byte(ip>>16))
-			data.options = append(data.options, byte(ip>>8))
-			data.options = append(data.options, byte(ip))
+			data.options = append(data.options, byte(tmp>>24))
+			data.options = append(data.options, byte(tmp>>16))
+			data.options = append(data.options, byte(tmp>>8))
+			data.options = append(data.options, byte(tmp))
 		}
 
 		utils.Debug(arg, debug)
