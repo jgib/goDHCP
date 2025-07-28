@@ -77,8 +77,8 @@ func PrintData() {
 	utils.Debug(fmt.Sprintf("SIADDR:     %d", data.siaddr), debug)
 	utils.Debug(fmt.Sprintf("GIADDR:     %d", data.giaddr), debug)
 	utils.Debug(fmt.Sprintf("CHADDR:\n%s", utils.WalkByteSlice(data.chaddr)), debug)
-	utils.Debug(fmt.Sprintf("SNAME:      %s", data.sname), debug)
-	utils.Debug(fmt.Sprintf("FILE:       %s", data.file), debug)
+	utils.Debug(fmt.Sprintf("SNAME:      %s\n%s", data.sname, utils.WalkByteSlice(data.sname)), debug)
+	utils.Debug(fmt.Sprintf("FILE:       %s\n%s", data.file, utils.WalkByteSlice(data.file)), debug)
 	utils.Debug(fmt.Sprintf("OPTIONS:\n%s", utils.WalkByteSlice(data.options)), debug)
 }
 
@@ -124,9 +124,19 @@ func main() {
 	utils.Er(err)
 	data.giaddr, err = utils.Ip2Uint32(jsonConfig.GIADDR)
 	utils.Er(err)
-	data.chaddr = []byte(jsonConfig.CHADDR)
-	data.sname = []byte(jsonConfig.SNAME)
-	data.file = []byte(jsonConfig.FILE)
+	data.chaddr = []byte(jsonConfig.CHADDR) // convert from hex
+	for i := 0; i < len([]byte(jsonConfig.SNAME)); i++ {
+		if i >= len(data.sname) {
+			break
+		}
+		data.sname[i] = []byte(jsonConfig.SNAME)[i]
+	}
+	for i := 0; i < len([]byte(jsonConfig.FILE)); i++ {
+		if i >= len(data.file) {
+			break
+		}
+		data.file[i] = []byte(jsonConfig.FILE)[i]
+	}
 
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
@@ -197,6 +207,8 @@ func main() {
 		utils.Er(fmt.Errorf("pool end IP [%s] cannot be larger than pool start IP [%s]", data.poolEnd, data.poolStart))
 	}
 
+	data.sname[len(data.sname)-1] = 0
+	data.file[len(data.file)-1] = 0
 	PrintData()
 
 }
