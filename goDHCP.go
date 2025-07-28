@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	utils "github.com/jgib/utils"
 )
@@ -45,9 +46,12 @@ type jsonData struct {
 	PoolEnd    string `json:"poolEnd"`
 	OP         byte   `json:"OP"`
 	HTYPE      byte   `json:"HTYPE"`
+	HLEN       byte   `json:"HLEN"`
 	HOPS       byte   `json:"HOPS"`
-	XID        byte   `json:"XID"`
-	FLAGS      byte   `json:"FLAGS"`
+	XID        uint32 `json:"XID"`
+	SECS       uint16 `json:"SECS"`
+	FLAGS      uint16 `json:"FLAGS"`
+	CIADDR     string `json:"CIADDR"`
 	YIADDR     string `json:"YIADDR"`
 	SIADDR     string `json:"SIADDR"`
 	GIADDR     string `json:"GIADDR"`
@@ -79,7 +83,9 @@ func PrintData() {
 }
 
 func main() {
-	data.configFile = "../config/goDHCP.json"
+	filePath, err := os.Executable()
+	utils.Er(err)
+	data.configFile = fmt.Sprintf("%s/../config/goDHCP.json", filepath.Dir(filePath))
 	data.serverPort = 67
 	data.clientPort = 68
 	data.op = 1
@@ -93,6 +99,35 @@ func main() {
 	args, err := utils.GetArgs(0)
 	utils.Er(err)
 
+	_, err = os.Stat(data.configFile)
+	utils.Er(err)
+	file, err := os.ReadFile(data.configFile)
+	utils.Er(err)
+	var jsonConfig jsonData
+	json.NewDecoder(bytes.NewBuffer(file)).Decode(&jsonConfig)
+
+	data.poolStart = jsonConfig.PoolStart
+	data.poolEnd = jsonConfig.PoolEnd
+	data.serverPort = jsonConfig.ServerPort
+	data.clientPort = jsonConfig.ClientPort
+	data.op = jsonConfig.OP
+	data.htype = jsonConfig.HTYPE
+	data.hlen = jsonConfig.HLEN
+	data.xid = jsonConfig.XID
+	data.secs = jsonConfig.SECS
+	data.flags = jsonConfig.FLAGS
+	data.ciaddr, err = utils.Ip2Uint32(jsonConfig.CIADDR)
+	utils.Er(err)
+	data.yiaddr, err = utils.Ip2Uint32(jsonConfig.YIADDR)
+	utils.Er(err)
+	data.siaddr, err = utils.Ip2Uint32(jsonConfig.SIADDR)
+	utils.Er(err)
+	data.giaddr, err = utils.Ip2Uint32(jsonConfig.GIADDR)
+	utils.Er(err)
+	data.chaddr = []byte(jsonConfig.CHADDR)
+	data.sname = []byte(jsonConfig.SNAME)
+	data.file = []byte(jsonConfig.FILE)
+
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
 
@@ -102,11 +137,12 @@ func main() {
 			fmt.Printf(" [-h | --help]  Print this help message.\n")
 
 			fmt.Printf("\nServer Parameters:\n")
-			fmt.Printf("  [-c | --config \"PATH\"]    Specify the JSON configuration file to use, Default: %s\n", data.configFile)
-			fmt.Printf(" <-ps | --poolstart A.B.C.D>  First IP in the pool.\n")
-			fmt.Printf(" <-pe | --poolend A.B.C.D>    Last IP in the pool.\n")
-			fmt.Printf(" [-sp | --serverport UINT16]  Server port, Default %d.\n", data.serverPort)
-			fmt.Printf(" [-cp | --clientport UINT16]  Client port, Default %d.\n", data.clientPort)
+			fmt.Printf(" [ -c | --config \"PATH\" ]     Specify the JSON configuration file to use.\n")
+			fmt.Printf("                                Default: %s\n", data.configFile)
+			fmt.Printf(" < -ps | --poolstart A.B.C.D >  First IP in the pool.\n")
+			fmt.Printf(" < -pe | --poolend A.B.C.D >    Last IP in the pool.\n")
+			fmt.Printf(" [ -sp | --serverport UINT16 ]  Server port, Default %d.\n", data.serverPort)
+			fmt.Printf(" [ -cp | --clientport UINT16 ]  Client port, Default %d.\n", data.clientPort)
 
 			os.Exit(0)
 		}
@@ -145,13 +181,6 @@ func main() {
 
 		utils.Debug(arg, debug)
 	}
-
-	_, err = os.Stat(data.configFile)
-	utils.Er(err)
-	file, err := os.ReadFile(data.configFile)
-	utils.Er(err)
-	var jsonConfig jsonData
-	json.NewDecoder(bytes.NewBuffer(file)).Decode(&jsonConfig)
 
 	if data.poolStart == "" {
 		data.poolStart = jsonConfig.PoolStart
