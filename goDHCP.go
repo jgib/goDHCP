@@ -10,6 +10,24 @@ import (
 	utils "github.com/jgib/utils"
 )
 
+/* Example Go Route:
+
+func testFunc(j string, wg *sync.WaitGroup) {
+	fmt.Printf("TEST:%s\r\n", j)
+	defer wg.Done()
+}
+
+	var wg sync.WaitGroup
+	wg.Add(len(ips))
+	for i := 0; i < len(n); i++ {
+
+
+		go testFunc(ip, &wg)
+
+	}
+	wg.Wait()
+*/
+
 var debug bool = false
 
 type dhcpData struct {
@@ -153,7 +171,9 @@ func main() {
 			fmt.Printf(" < -pe | --poolend A.B.C.D >    Last IP in the pool.\n")
 			fmt.Printf(" [ -sp | --serverport UINT16 ]  Server port, Default %d.\n", data.serverPort)
 			fmt.Printf(" [ -cp | --clientport UINT16 ]  Client port, Default %d.\n", data.clientPort)
-
+			fmt.Printf("\n")
+			fmt.Printf("Specific DHCP options, as well as the options listed above, are configured in\n")
+			fmt.Printf("the file 'config/example.json'\n")
 			os.Exit(0)
 		}
 
