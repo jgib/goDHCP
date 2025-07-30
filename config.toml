@@ -1,0 +1,56 @@
+[server]
+poolStart = "192.168.0.100"
+poolEnd = "192.168.0.200"
+serverPort = 67
+clientPort = 68
+
+[fields]
+op = 1
+htype = 1
+hlen = 6
+hops = 0
+xid = 0
+secs = 0
+flags = 0
+ciaddr = "0.0.0.0"
+yiaddr = "0.0.0.0"
+siaddr = "0.0.0.0"
+giaddr = "0.0.0.0"
+chaddr = 0x0
+sname = "test string"
+file = "test string 2"
+
+[fields.options]
+##############################
+# RFC 1497 Vendor Extensions #
+##############################
+pad  = true            #Option 0:   Pad (bool)
+end  = true            #Option 255: End (bool)
+snm  = "255.255.255.0" #Option 1:   Subnet Mask
+toff = 0               #Option 2:   Time Offset (uint32)
+rtr  = "192.168.0.1"   #Option 3:   Router (uint32) (multiple)
+tsvr = "192.168.0.1"   #Option 4:   Time Server (uint32) (multiple)
+ns   = "192.168.0.1"   #Option 5:   Name Server (uint32) (multiple)
+dns  = "192.168.0.1"   #Option 6:   Domain Name Server (uint32) (multiple)
+lsvr = "192.168.0.1"   #Option 7:   Log Server (uint32) (multiple)
+csvr = "192.168.0.1"   #Option 8:   Cookie Server (uint32) (multiple)
+lprs = "192.168.0.1"   #Option 9:   Line Printer Server (uint32) (multiple)
+isvr = "192.168.0.1"   #Option 10:  Impress Server (uint32) (multiple)
+rls  = "192.168.0.1"   #Option 11:  Resource Location Server (uint32) (multiple)
+hn   = "hostname"      #Option 12:  Host Name (string)
+bfs  = 33              #Option 13:  Boot File Size (uint16)
+mdf  = "file path"     #Option 14:  Merit Dump File (string) (NVT)
+dn   = "domain name"   #Option 15:  Domain Name (string)
+ss   = "192.168.0.1"   #Option 16:  Swap Server (string) (ip address)
+rp   = "path"          #Option 17:  Root Path (string) (NVT)
+ep   = "path"          #Option 18:  Extensions Path (string)
+################################
+# IP Layer Parameters per Host #
+################################
+ipfw  = true                               #Option 19:  IP Forwarding Enable/Disable (bool)
+nlsr  = true                               #Option 20:  Non-Local Source Routing (bool)
+pf    = [ "192.168.0.1", "255.255.255.0" ] #Option 21: Policy Filter ([2]string) (ip, snm)
+mdrs  = 1500                               #Option 22: Maximum Datagram Reassembly Size (uint16) (min:576)
+ipttl = 30                                 #Option 23: Default IP Time-to-live (uint16)
+pmat  = 300                                #Option 24: Path MTU Aging Timeout Option (uint16)
+pmpt  = 

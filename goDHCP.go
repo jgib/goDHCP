@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -32,51 +33,34 @@ var debug bool = false
 
 type dhcpData struct {
 	configFile string
-	poolStart  string
-	poolEnd    string
-	serverPort uint16
-	clientPort uint16
+	poolStart  string `json:"poolStart"`
+	poolEnd    string `json:"poolEnd"`
+	serverPort uint16 `json:"serverPort"`
+	clientPort uint16 `json:"clientPort"`
 
 	// OPTIONS
-	op      byte
-	htype   byte
-	hlen    byte
-	hops    byte
-	xid     uint32
-	secs    uint16
-	flags   uint16
-	ciaddr  uint32
-	yiaddr  uint32
-	siaddr  uint32
-	giaddr  uint32
-	chaddr  []byte // 16 Bytes
-	sname   []byte // 64 Bytes
-	file    []byte // 128 Bytes
-	options []byte // Variable Bytes
+	op          byte   `json:"OP"`
+	htype       byte   `json:"HTYPE"`
+	hlen        byte   `json:"HLEN"`
+	hops        byte   `json:"HOPS"`
+	xid         uint32 `json:"XID"`
+	secs        uint16 `json:"SECS"`
+	flags       uint16 `json:"FLAGS"`
+	ciaddr      string `json:"CIADDR"`
+	yiaddr      string `json:"YIADDR"`
+	siaddr      string `json:"SIADDR"`
+	giaddr      string `json:"GIADDR"`
+	chaddr      string `json:"CHADDR"`
+	chaddrBytes []byte // 16 Bytes
+	sname       string `json:"SNAME"` // 64 Bytes
+	file        string `json:"FILE"`  // 128 Bytes
+	options     []byte // Variable Bytes
+	opt1        string `json:"OPT1"`
+	opt2        uint32 `json:"OPT2"`
+	opt3        string `json:"OPT3"`
 }
 
 var data dhcpData
-
-type jsonData struct {
-	ServerPort uint16 `json:"serverPort"`
-	ClientPort uint16 `json:"clientPort"`
-	PoolStart  string `json:"poolStart"`
-	PoolEnd    string `json:"poolEnd"`
-	OP         byte   `json:"OP"`
-	HTYPE      byte   `json:"HTYPE"`
-	HLEN       byte   `json:"HLEN"`
-	HOPS       byte   `json:"HOPS"`
-	XID        uint32 `json:"XID"`
-	SECS       uint16 `json:"SECS"`
-	FLAGS      uint16 `json:"FLAGS"`
-	CIADDR     string `json:"CIADDR"`
-	YIADDR     string `json:"YIADDR"`
-	SIADDR     string `json:"SIADDR"`
-	GIADDR     string `json:"GIADDR"`
-	CHADDR     string `json:"CHADDR"`
-	SNAME      string `json:"SNAME"`
-	FILE       string `json:"FILE"`
-}
 
 func PrintData() {
 	utils.Debug(fmt.Sprintf("POOL START: %s", data.poolStart), debug)
@@ -94,10 +78,11 @@ func PrintData() {
 	utils.Debug(fmt.Sprintf("YIADDR:     %d", data.yiaddr), debug)
 	utils.Debug(fmt.Sprintf("SIADDR:     %d", data.siaddr), debug)
 	utils.Debug(fmt.Sprintf("GIADDR:     %d", data.giaddr), debug)
-	utils.Debug(fmt.Sprintf("CHADDR:\n%s", utils.WalkByteSlice(data.chaddr)), debug)
-	utils.Debug(fmt.Sprintf("SNAME:      %s\n%s", data.sname, utils.WalkByteSlice(data.sname)), debug)
-	utils.Debug(fmt.Sprintf("FILE:       %s\n%s", data.file, utils.WalkByteSlice(data.file)), debug)
+	utils.Debug(fmt.Sprintf("CHADDR:\n%s", data.chaddr), debug)
+	utils.Debug(fmt.Sprintf("SNAME:      %s\n", data.sname), debug)
+	utils.Debug(fmt.Sprintf("FILE:       %s\n", data.file), debug)
 	utils.Debug(fmt.Sprintf("OPTIONS:\n%s", utils.WalkByteSlice(data.options)), debug)
+
 }
 
 func main() {
@@ -109,9 +94,7 @@ func main() {
 	data.op = 1
 	data.htype = 1
 	data.hlen = 6
-	data.chaddr = make([]byte, 16)
-	data.sname = make([]byte, 64)
-	data.file = make([]byte, 128)
+	data.chaddrBytes = make([]byte, 16)
 	data.options = []byte{}
 
 	args, err := utils.GetArgs(0)
@@ -121,27 +104,8 @@ func main() {
 	utils.Er(err)
 	file, err := os.ReadFile(data.configFile)
 	utils.Er(err)
-	var jsonConfig jsonData
-	json.NewDecoder(bytes.NewBuffer(file)).Decode(&jsonConfig)
+	json.NewDecoder(bytes.NewBuffer(file)).Decode(&data)
 
-	data.poolStart = jsonConfig.PoolStart
-	data.poolEnd = jsonConfig.PoolEnd
-	data.serverPort = jsonConfig.ServerPort
-	data.clientPort = jsonConfig.ClientPort
-	data.op = jsonConfig.OP
-	data.htype = jsonConfig.HTYPE
-	data.hlen = jsonConfig.HLEN
-	data.xid = jsonConfig.XID
-	data.secs = jsonConfig.SECS
-	data.flags = jsonConfig.FLAGS
-	data.ciaddr, err = utils.Ip2Uint32(jsonConfig.CIADDR)
-	utils.Er(err)
-	data.yiaddr, err = utils.Ip2Uint32(jsonConfig.YIADDR)
-	utils.Er(err)
-	data.siaddr, err = utils.Ip2Uint32(jsonConfig.SIADDR)
-	utils.Er(err)
-	data.giaddr, err = utils.Ip2Uint32(jsonConfig.GIADDR)
-	utils.Er(err)
 	data.chaddr = []byte(jsonConfig.CHADDR) // convert from hex
 	for i := 0; i < len([]byte(jsonConfig.SNAME)); i++ {
 		if i >= len(data.sname) {
@@ -208,8 +172,6 @@ func main() {
 			utils.Er(err)
 			data.clientPort = tmp
 		}
-
-		utils.Debug(arg, debug)
 	}
 
 	if data.poolStart == "" {
@@ -229,6 +191,12 @@ func main() {
 
 	data.sname[len(data.sname)-1] = 0
 	data.file[len(data.file)-1] = 0
-	PrintData()
 
+	data.chaddrBytes, err = hex.DecodeString(data.chaddr)
+	utils.Er(err)
+
+	utils.Debug(utils.WalkByteSlice(data.chaddrBytes), debug)
+	fmt.Printf("CHADDR [%s]\n", utils.WalkByteSlice(data.chaddrBytes))
+
+	PrintData()
 }
