@@ -83,7 +83,7 @@ tkag  = true #Option 39: TCP Keepalive Garbage (bool)
 nisd  = "nisDomain"        #Option 40: Network Information Service Domain (string) (nvt)
 nisvr = [ "192.168.0.1" ]  #Option 41: Network Information Servers ([]string) (ip)
 ntps  = [ "192.168.0.1" ]  #Option 42: Network Time Protocol Servers ([]string) (ip)
-vsi   = [ 23, 55, 77 ]     #Option 43: Vendor Specific Information ([]byte)
+vsi   = [ 47, 7, 45 ]      #Option 43: Vendor Specific Information ([]byte)
 nbns  = [ "192.168.0.1" ]  #Option 44: NetBIOS over TCP/IP Name Server ([]string) (ip)
 nbdds = [ "192.168.0.1" ]  #Option 45: NetBIOS over TCP/IP Datagram Distribution Server ([]string) (ip)
 nbnt  = 0x4                #Option 46: NetBIOS over TCP/IP Node Type (uint8)
@@ -104,3 +104,17 @@ stdas = [ "192.168.0.1" ]  #Option 76: StreetTalk Directory Assiatance (STDA) Se
 ###################
 # DHCP Extensions #
 ###################
+ripa   = "192.168.0.1"  #Option 50: Requested IP Address (string) (ip)
+ipalt  = 86400          #Option 51: IP Address Lease Time (uint32)
+optovr = 3              #Option 52: Option Overload (uint8) (1||2||3)
+tftpsn = "tftpName"     #Option 66: TFTP Server Name (string)
+bfname = "bottFileName" #Option 67: Bootfile Name (string)
+msgtyp = 2              #Option 53: DHCP Message Type ## Not configurable, automatically choosen by server
+svrid  = "192.168.0.1"  #Option 54: Server Identifier (string) (ip)
+prl    = [ 1, 66, 18 ]  #Option 55: Parameter Request List ## Not configurable, used by client
+msg    = "errMsg"       #Option 56: Message (string) (nvt)
+maxmsg = 1024           #Option 57: Maximum DHCP Message Size (uint16) (min:576)
+t1     = 43200          #Option 58: Renewal (T1) Time Value (uint32)
+t2     = 43200          #Option 59: Rebinding (T2) Time Value (uint32)
+vcid   = [ 45, 47, 7 ]  #Option 60: Vendor Class Identifier ([]byte)
+cident = [ 7, 45, 47 ]  #Option 61: Client-Identifier ([]byte)
