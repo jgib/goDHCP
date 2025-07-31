@@ -24,33 +24,83 @@ file = "test string 2"
 ##############################
 # RFC 1497 Vendor Extensions #
 ##############################
-pad  = true            #Option 0:   Pad (bool)
-end  = true            #Option 255: End (bool)
-snm  = "255.255.255.0" #Option 1:   Subnet Mask
-toff = 0               #Option 2:   Time Offset (uint32)
-rtr  = "192.168.0.1"   #Option 3:   Router (uint32) (multiple)
-tsvr = "192.168.0.1"   #Option 4:   Time Server (uint32) (multiple)
-ns   = "192.168.0.1"   #Option 5:   Name Server (uint32) (multiple)
-dns  = "192.168.0.1"   #Option 6:   Domain Name Server (uint32) (multiple)
-lsvr = "192.168.0.1"   #Option 7:   Log Server (uint32) (multiple)
-csvr = "192.168.0.1"   #Option 8:   Cookie Server (uint32) (multiple)
-lprs = "192.168.0.1"   #Option 9:   Line Printer Server (uint32) (multiple)
-isvr = "192.168.0.1"   #Option 10:  Impress Server (uint32) (multiple)
-rls  = "192.168.0.1"   #Option 11:  Resource Location Server (uint32) (multiple)
-hn   = "hostname"      #Option 12:  Host Name (string)
-bfs  = 33              #Option 13:  Boot File Size (uint16)
-mdf  = "file path"     #Option 14:  Merit Dump File (string) (NVT)
-dn   = "domain name"   #Option 15:  Domain Name (string)
-ss   = "192.168.0.1"   #Option 16:  Swap Server (string) (ip address)
-rp   = "path"          #Option 17:  Root Path (string) (NVT)
-ep   = "path"          #Option 18:  Extensions Path (string)
+pad  = true               #Option 0:   Pad (bool)
+end  = true               #Option 255: End (bool)
+snm  = "255.255.255.0"    #Option 1:   Subnet Mask (string) (ip)
+toff = 0                  #Option 2:   Time Offset (uint32)
+rtr  = [ "192.168.0.1" ]  #Option 3:   Router ([]string) (ip)
+tsvr = [ "192.168.0.1" ]  #Option 4:   Time Server ([]string) (ip)
+ns   = [ "192.168.0.1" ]  #Option 5:   Name Server ([]string) (ip)
+dns  = [ "192.168.0.1" ]  #Option 6:   Domain Name Server ([]string) (ip)
+lsvr = [ "192.168.0.1" ]  #Option 7:   Log Server ([]string) (ip)
+csvr = [ "192.168.0.1" ]  #Option 8:   Cookie Server ([]string) (ip)
+lprs = [ "192.168.0.1" ]  #Option 9:   Line Printer Server ([]string) (ip)
+isvr = [ "192.168.0.1" ]  #Option 10:  Impress Server ([]string) (ip)
+rls  = [ "192.168.0.1" ]  #Option 11:  Resource Location Server ([]string) (ip)
+hn   = "hostname"         #Option 12:  Host Name (string)
+bfs  = 33                 #Option 13:  Boot File Size (uint16)
+mdf  = "file path"        #Option 14:  Merit Dump File (string) (NVT)
+dn   = "domain name"      #Option 15:  Domain Name (string)
+ss   = "192.168.0.1"      #Option 16:  Swap Server (string) (ip)
+rp   = "path"             #Option 17:  Root Path (string) (NVT)
+ep   = "path"             #Option 18:  Extensions Path (string)
 ################################
 # IP Layer Parameters per Host #
 ################################
-ipfw  = true                               #Option 19:  IP Forwarding Enable/Disable (bool)
-nlsr  = true                               #Option 20:  Non-Local Source Routing (bool)
-pf    = [ "192.168.0.1", "255.255.255.0" ] #Option 21: Policy Filter ([2]string) (ip, snm)
-mdrs  = 1500                               #Option 22: Maximum Datagram Reassembly Size (uint16) (min:576)
-ipttl = 30                                 #Option 23: Default IP Time-to-live (uint16)
-pmat  = 300                                #Option 24: Path MTU Aging Timeout Option (uint16)
-pmpt  = 
+ipfw  = true                                   #Option 19: IP Forwarding Enable/Disable (bool)
+nlsr  = true                                   #Option 20: Non-Local Source Routing (bool)
+pf    = [ [ "192.168.0.1", "255.255.255.0" ] ] #Option 21: Policy Filter ([][2]string) (ip, snm)
+mdrs  = 1500                                   #Option 22: Maximum Datagram Reassembly Size (uint16) (min:576)
+ipttl = 30                                     #Option 23: Default IP Time-to-live (uint16)
+pmat  = 300                                    #Option 24: Path MTU Aging Timeout Option (uint16)
+pmpt  = [ 80, 77 ]                             #Option 25: Path MTU Plateau Table ([]uint16) (min:68)
+#####################################
+# IP Layer Parameters per Interface #
+#####################################
+imtu   = 80                                    #Option 26: Interface MTU (uint16) (multiple) (min:68)
+asal   = true                                  #Option 27: All Subnets are Local (bool)
+bcaddr = "192.168.0.255"                       #Option 28: Broadcast Address (string) (ip)
+pmd    = true                                  #Option 29: Perform Mask Discovery (bool)
+msup   = true                                  #Option 30: Mask Supplier (bool)
+prd    = true                                  #Option 31: Perform Router Discovery (bool)
+rsa    = "192.168.0.1"                         #Option 32: Router Solicitation Address (string) (ip)
+srt    = [ [ "192.168.0.10", "192.168.0.1" ] ] #Option 33: Static Route ([][2]string) (ip, ip)
+#######################################
+# Link Layer Parameters per Interface #
+#######################################
+tencp = true #Option 34: Trailer Encapsulation (bool)
+actim = 600  #Option 35: ARP Cache Timeout (uint32)
+eencp = true #Option 36: Ethernet Encapsulation (bool)
+##################
+# TCP Parameters #
+##################
+tdttl = 38   #Option 37: TCP Default TTL (uint8)
+tkai  = 0    #Option 38: TCP Keepalive Interval (uint32)
+tkag  = true #Option 39: TCP Keepalive Garbage (bool)
+######################################
+# Application and Service Parameters #
+######################################
+nisd  = "nisDomain"        #Option 40: Network Information Service Domain (string) (nvt)
+nisvr = [ "192.168.0.1" ]  #Option 41: Network Information Servers ([]string) (ip)
+ntps  = [ "192.168.0.1" ]  #Option 42: Network Time Protocol Servers ([]string) (ip)
+vsi   = [ 23, 55, 77 ]     #Option 43: Vendor Specific Information ([]byte)
+nbns  = [ "192.168.0.1" ]  #Option 44: NetBIOS over TCP/IP Name Server ([]string) (ip)
+nbdds = [ "192.168.0.1" ]  #Option 45: NetBIOS over TCP/IP Datagram Distribution Server ([]string) (ip)
+nbnt  = 0x4                #Option 46: NetBIOS over TCP/IP Node Type (uint8)
+nbs   = "scope"            #Option 47: NetBIOS over TCP/IP Scope (string)
+xwsfs = [ "192.168.0.1" ]  #Option 48: X Window System Font Server ([]string) (ip)
+xwsdm = [ "192.168.0.1" ]  #Option 49: X Window System Display Manager ([]string) (ip)
+nispd = "nisPlusDomain"    #Option 64: Network Information Service+ Domain (string)
+nisps = [ "192.168.0.1" ]  #Option 65: Network Information Service+ Servers ([]string) (ip)
+mipha = [ "192.168.0.1" ]  #Option 68: Mobile IP Home Agent ([]string) (ip)
+smtps = [ "192.168.0.1" ]  #Option 69: Simple Mail Transfer Protocol (SMTP) Server ([]string) (ip)
+pop3s = [ "192.168.0.1" ]  #Option 70: Post Office Protocol (POP3) Server ([]string) (ip)
+nntps = [ "192.168.0.1" ]  #Option 71: Network News Transport Protocol (NNTP) Server ([]string) (ip)
+dwwws = [ "192.168.0.1" ]  #Option 72: Default World Wide Web (WWW) Server ([]string) (ip)
+dfs   = [ "192.168.0.1" ]  #Option 73: Default Finger Server ([]string) (ip)
+dircs = [ "192.168.0.1" ]  #Option 74: Default Internet Relay Chat (IRC) Server ([]string) (ip)
+sts   = [ "192.168.0.1" ]  #Option 75: StreetTalk Server ([]string) (ip)
+stdas = [ "192.168.0.1" ]  #Option 76: StreetTalk Directory Assiatance (STDA) Server ([]string) (ip)
+###################
+# DHCP Extensions #
+###################
